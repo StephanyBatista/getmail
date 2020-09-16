@@ -20,6 +20,12 @@ func SubscriberPost(c *gin.Context) {
 	requestBody := subscriberRequest{}
 	c.Bind(&requestBody)
 
+	var subscribedSaved subscribers.Subscriber
+	if err := data.Repository.First(&subscribedSaved, "email = ?", requestBody.ListID); err == nil {
+		c.JSON(201, NewDataResponse())
+		return
+	}
+
 	model, err := subscribers.New(requestBody.Email, requestBody.Name)
 	if err != nil {
 		c.JSON(400, NewDataResponseWithError(err))
@@ -31,8 +37,9 @@ func SubscriberPost(c *gin.Context) {
 		if err := data.Repository.First(&list, "ID = ?", requestBody.ListID); err != nil {
 			c.JSON(400, NewDataResponseWithError(fmt.Errorf("List not found")))
 			return
+		} else {
+			model.PutOnList(list.Base.ID)
 		}
-		model.PutOnList(list.Base.ID)
 	}
 
 	if err := data.Repository.Create(model); err != nil {

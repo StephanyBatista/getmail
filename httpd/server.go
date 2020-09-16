@@ -1,9 +1,11 @@
 package httpd
 
+import "os"
+
 //InitializeHttpServer creates new server
 func InitializeHttpServer() {
 
 	router := RegisterHTTPHandlers()
 
-	router.Run(":5000")
+	router.Run(":" + os.Getenv("PORT"))
 }

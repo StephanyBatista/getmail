@@ -8,6 +8,7 @@ import (
 
 func RegisterHTTPHandlers() *gin.Engine {
 	router := gin.Default()
+	router.GET("/environment", handler.EnvironmentGet)
 	router.GET("/subscriber", handler.SubscriberGet)
 	router.POST("/subscriber", handler.SubscriberPost)
 	router.POST("/list", handler.ListPost)

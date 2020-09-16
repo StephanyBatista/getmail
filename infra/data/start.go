@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"getmail/domain/lists"
 	"getmail/domain/subscribers"
+	"os"
 
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
@@ -13,8 +14,7 @@ import (
 var connection *gorm.DB
 
 func openDB() {
-	connectionString := "sqlserver://sa:p4ssw0rd*@localhost:1433?database=getmail"
-	db, err := gorm.Open(sqlserver.Open(connectionString), &gorm.Config{})
+	db, err := gorm.Open(sqlserver.Open(os.Getenv("DB_CONNECTION")), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
