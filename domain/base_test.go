@@ -7,14 +7,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_MustNewBaseGeneratesNewUUID(t *testing.T) {
+func Test_MustNewBaseGeneratesNewIDWith8Char(t *testing.T) {
+
+	const numberOfChar = 8
 
 	base := domain.NewBase()
 
-	assert.NotNil(t, base.ID)
+	assert.Equal(t, numberOfChar, len(base.ID))
 }
 
-func Test_MustNewBaseInformWhenWasCreated(t *testing.T) {
+func Test_MustNewBaseTellsWhenWasCreated(t *testing.T) {
 
 	base := domain.NewBase()
 

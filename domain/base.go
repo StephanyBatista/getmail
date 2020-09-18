@@ -1,22 +1,20 @@
 package domain
 
 import (
+	"getmail/util"
 	"time"
-
-	guuid "github.com/google/uuid"
 )
 
 //Base means the basic of a domain
 type Base struct {
-	ID        guuid.UUID `gorm:"primaryKey"`
+	ID        string `gorm:"primaryKey"`
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 //NewBase creates a new Base
 func NewBase() Base {
 	return Base{
-		ID:        guuid.New(),
+		ID:        util.NewID(),
 		CreatedAt: time.Now(),
 	}
 }

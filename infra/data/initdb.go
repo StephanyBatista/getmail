@@ -10,20 +10,17 @@ import (
 	"gorm.io/gorm"
 )
 
-//Connection return a connection open from database
-var connection *gorm.DB
-
-func openDB() {
+func getDB() *gorm.DB {
 	db, err := gorm.Open(sqlserver.Open(os.Getenv("DB_CONNECTION")), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-	connection = db
+	return db
 }
 
 //InitializeDB initializes connection and execute migrate from database
 func InitializeDB() {
-	openDB()
+	connection := getDB()
 	connection.AutoMigrate(&subscribers.Subscriber{}, &lists.List{})
 	fmt.Println("Connection SQL: ", connection)
 

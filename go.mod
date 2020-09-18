@@ -7,6 +7,8 @@ require (
 	github.com/alecthomas/kingpin v2.2.6+incompatible // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
+	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/brianvoe/gofakeit/v5 v5.9.3 // indirect
 	github.com/cheggaaa/pb v1.0.29 // indirect
 	github.com/codesenberg/bombardier v1.2.4 // indirect
 	github.com/codesenberg/concurrent v0.0.0-20180531114123-64560cfcf964 // indirect

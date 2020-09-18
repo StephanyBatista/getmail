@@ -1,10 +1,9 @@
 package subscribers
 
 import (
+	"fmt"
 	"getmail/domain"
 	"getmail/util"
-
-	guuid "github.com/google/uuid"
 )
 
 // Subscriber is one person that subscriber
@@ -12,7 +11,7 @@ type Subscriber struct {
 	Base   domain.Base `json:"base" gorm:"embedded"`
 	Email  string      `json:"email" validate:"required,email"`
 	Name   string      `json:"name" validate:"required"`
-	ListID guuid.UUID  `json:"listid"`
+	ListID string      `json:"listid"`
 }
 
 //New creates a new subscriber
@@ -28,7 +27,14 @@ func New(email, name string) (*Subscriber, error) {
 	return model, err
 }
 
-//PutOnList put the subscriber in the list choosed
-func (s *Subscriber) PutOnList(ListID guuid.UUID) {
-	s.ListID = ListID
+//PutOnList puts the subscriber in the list choosed
+func (s *Subscriber) PutOnList(listID string) error {
+
+	if len(listID) == 0 {
+		return fmt.Errorf("The list must be valid to put subscriber in a list")
+	}
+
+	s.ListID = listID
+
+	return nil
 }

@@ -8,6 +8,7 @@ import (
 
 type IRepository interface {
 	Create(value interface{}) error
+	Save(value interface{}) error
 	First(obj interface{}, query string, args ...interface{}) error
 	Find(obj interface{}, conds ...interface{}) error
 }
@@ -21,6 +22,15 @@ var Repository IRepository
 //Create inserts a new row
 func (r *RepositoryStruct) Create(value interface{}) error {
 	result := r.connection.Create(value)
+	if result == nil || result.Error != nil {
+		return fmt.Errorf("an error ocurred")
+	}
+	return nil
+}
+
+//Save updates a row
+func (r *RepositoryStruct) Save(value interface{}) error {
+	result := r.connection.Save(value)
 	if result == nil || result.Error != nil {
 		return fmt.Errorf("an error ocurred")
 	}
