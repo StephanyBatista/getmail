@@ -64,9 +64,7 @@ func subscribeAlreadySaved(c *gin.Context, requestBody subscriberRequest) bool {
 
 	if len(subscribedSaved.Base.ID) > 0 {
 		putSubscriberOnList(c, requestBody, &subscribedSaved)
-		if err := data.Repository.Save(&subscribedSaved); err != nil {
-			return false
-		}
+		data.Repository.Save(&subscribedSaved)
 		c.JSON(201, NewDataResponse())
 		return true
 	}
