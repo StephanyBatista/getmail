@@ -5,6 +5,7 @@ import (
 	"getmail/domain/lists"
 	"getmail/domain/subscribers"
 	"getmail/infra/data"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,54 +21,53 @@ func SubscriberPost(c *gin.Context) {
 	requestBody := subscriberRequest{}
 	c.Bind(&requestBody)
 
-	if subscribeAlreadySaved(c, requestBody) {
+	if err := subscribeHasAlreadyBeenSaved(requestBody); err != nil {
+		c.JSON(400, NewDataResponseWithError(err))
 		return
 	}
 
-	model, hasError := createNewModel(c, requestBody)
-	if !hasError {
-		if err := data.Repository.Create(model); err != nil {
-			c.JSON(500, NewDataResponseWithServerError())
-			return
-		}
-
-		c.JSON(201, NewDataResponse())
+	if err := saveNewSubscriber(requestBody); err != nil {
+		c.JSON(400, NewDataResponseWithError(err))
+		return
 	}
+
+	c.JSON(http.StatusCreated, "")
 }
 
-func createNewModel(c *gin.Context, requestBody subscriberRequest) (*subscribers.Subscriber, bool) {
+func saveNewSubscriber(requestBody subscriberRequest) error {
 	model, err := subscribers.New(requestBody.Email, requestBody.Name)
 	if err != nil {
-		c.JSON(400, NewDataResponseWithError(err))
-		return nil, true
+		return err
 	}
 
-	return model, putSubscriberOnList(c, requestBody, model)
+	putSubscriberOnListIfExist(requestBody.ListID, model)
+	data.Repository.Create(model)
+	return nil
 }
 
-func putSubscriberOnList(c *gin.Context, requestBody subscriberRequest, model *subscribers.Subscriber) bool {
-	if len(requestBody.ListID) > 0 {
+func putSubscriberOnListIfExist(listID string, model *subscribers.Subscriber) error {
+	if len(listID) > 0 {
 		var list lists.List
-		if err := data.Repository.First(&list, "ID = ?", requestBody.ListID); err != nil {
-			c.JSON(400, NewDataResponseWithError(fmt.Errorf("List not found")))
-			return true
-		} else {
-			model.PutOnList(list.Base.ID)
+		data.Repository.First(&list, "ID = ?", listID)
+		if len(list.Base.ID) == 0 {
+			return fmt.Errorf("List not found")
 		}
+
+		model.PutOnList(list.Base.ID)
 	}
-	return false
+	return nil
 }
 
-func subscribeAlreadySaved(c *gin.Context, requestBody subscriberRequest) bool {
+func subscribeHasAlreadyBeenSaved(requestBody subscriberRequest) error {
 	var subscribedSaved subscribers.Subscriber
 	data.Repository.First(&subscribedSaved, "email = ?", requestBody.Email)
 
 	if len(subscribedSaved.Base.ID) > 0 {
-		putSubscriberOnList(c, requestBody, &subscribedSaved)
+		if err := putSubscriberOnListIfExist(requestBody.ListID, &subscribedSaved); err != nil {
+			return err
+		}
 		data.Repository.Save(&subscribedSaved)
-		c.JSON(201, NewDataResponse())
-		return true
 	}
 
-	return false
+	return nil
 }
