@@ -1,12 +1,52 @@
-<form action="http://localhost:5000/subscriber" method="post" target="_blank">
-    <div id="mc_embed_signup_scroll"><div class="mc-field-group">
-    <label >Email  <span class="asterisk">*</span>
+<label>Teste</label>
+
+<form id="form-getmail">
+    <label >Email</span>
     </label>
-    <input type="email" value="" name="email" class="required email"></div><div class="mc-field-group">
-    <label for="mce-FNAME">Nome </label>
-    <input type="text" value="" name="name" class="" id="name"></div>
-    <input type="list" value="" name="email" class="required email" value="23212122"></div><div class="mc-field-group"></div>
-    <div id="mce-responses" class="clear"><div class="response" id="mce-error-response" style="display:none"></div>
-    <div class="response" id="mce-success-response" style="display:none"></div></div><div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_b0fba2e4aa0242759774cb633_a85e5edf0e" tabindex="-1" value=""></div><div class="clear">
-    <input type="submit" value="Salvar" name="subscribe" id="mc-embedded-subscribe" class="button"></div></div>
+    <input type="email" id="email" name="email" required></div>
+    <label>Name </label>
+    <input type="text" id="name" name="name"></div>
+    <div id="response" class="clear">
+    <input type="submit" value="Save" class="button"></div>
 </form>
+
+<script
+  src="https://code.jquery.com/jquery-1.12.4.min.js"
+  integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+  crossorigin="anonymous"></script>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/jquery.serializeJSON/3.1.0/jquery.serializejson.min.js"></script>
+
+<script>
+    $( "#form-getmail").submit(function( event ) {
+        var $form = $("#form-getmail");
+        var data = getFormData($form);
+        console.log(JSON.stringify($("#form-getmail").serialize()))
+        
+        $.ajax({
+            url: 'http://localhost:5000/subscriber', // url where to submit the request
+            type : "POST", // type of action POST || GET
+            //contentType: "application/json",
+            //dataType : "json", // data type
+            data: $("#form-getmail").serialize(), //JSON.stringify(data), // post data || get data
+            success : function(result) {
+                $("#response").html("Thanks")
+            },
+            error: function(xhr, resp, text) {
+                console.log(resp);
+            }
+        })
+        event.preventDefault();
+    });
+
+    function getFormData($form){
+        var unindexed_array = $form.serializeArray();
+        var indexed_array = {};
+
+        $.map(unindexed_array, function(n, i){
+            indexed_array[n['name']] = n['value'];
+        });
+
+        return indexed_array;
+    }
+</script>

@@ -3,7 +3,6 @@ package subscribers
 import (
 	"fmt"
 	"getmail/domain"
-	"getmail/util"
 )
 
 // Subscriber is one person that subscriber
@@ -23,7 +22,7 @@ func New(email, name string) (*Subscriber, error) {
 		Name:  name,
 	}
 
-	err := util.ValidateData(model)
+	err := domain.ValidateData(model)
 	return model, err
 }
 

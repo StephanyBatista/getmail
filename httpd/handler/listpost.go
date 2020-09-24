@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"getmail/domain/lists"
 	"getmail/infra/data"
 
@@ -8,7 +9,7 @@ import (
 )
 
 type listRequest struct {
-	Name string `json:"name"`
+	Name string `json:"name" form:"name"`
 }
 
 //ListPost create a new list
@@ -16,6 +17,12 @@ func ListPost(c *gin.Context) {
 
 	requestBody := listRequest{}
 	c.Bind(&requestBody)
+
+	var list lists.List
+	data.Repository.First(&list, "name = ?", requestBody.Name)
+	if len(list.Base.ID) > 0 {
+		c.JSON(400, NewDataResponseWithError(fmt.Errorf("List already exists")))
+	}
 
 	model, err := lists.New(requestBody.Name)
 	if err != nil {
@@ -28,5 +35,5 @@ func ListPost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(201, NewDataResponse())
+	c.JSON(201, "")
 }

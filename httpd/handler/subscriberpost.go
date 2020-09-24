@@ -22,12 +22,12 @@ func SubscriberPost(c *gin.Context) {
 	c.Bind(&requestBody)
 
 	if err := subscribeHasAlreadyBeenSaved(requestBody); err != nil {
-		c.JSON(400, NewDataResponseWithError(err))
+		c.JSON(http.StatusBadRequest, NewDataResponseWithError(err))
 		return
 	}
 
 	if err := saveNewSubscriber(requestBody); err != nil {
-		c.JSON(400, NewDataResponseWithError(err))
+		c.JSON(http.StatusBadRequest, NewDataResponseWithError(err))
 		return
 	}
 

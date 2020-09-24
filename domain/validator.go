@@ -1,8 +1,6 @@
-package util
+package domain
 
 import (
-	"fmt"
-
 	"github.com/go-playground/validator"
 )
 
@@ -31,16 +29,16 @@ func ValidateData(dataSet interface{}) error {
 			switch err.Tag() {
 			case "required":
 				//errors = append(errors, fmt.Errorf("The "+err.Field()+" is required"))
-				return fmt.Errorf("The " + err.Field() + " is required")
+				return NewError("The " + err.Field() + " is required")
 			case "email":
 				//errors = append(errors, fmt.Errorf("The "+err.Field()+" should be a valid email"))
-				return fmt.Errorf("The " + err.Field() + " should be a valid email")
+				return NewError("The " + err.Field() + " should be a valid email")
 			case "eqfield":
 				//errors = append(errors, fmt.Errorf("The "+err.Field()+" should be equal to the "+err.Param()))
-				return fmt.Errorf("The " + err.Field() + " should be equal to the " + err.Param())
+				return NewError("The " + err.Field() + " should be equal to the " + err.Param())
 			default:
 				//errors = append(errors, fmt.Errorf("The "+err.Field()+" is invalid"))
-				return fmt.Errorf("The " + err.Field() + " is invalid")
+				return NewError("The " + err.Field() + " is invalid")
 			}
 		}
 	}

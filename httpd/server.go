@@ -1,6 +1,8 @@
 package httpd
 
-import "os"
+import (
+	"os"
+)
 
 //InitializeHttpServer creates new server
 func InitializeHttpServer() {

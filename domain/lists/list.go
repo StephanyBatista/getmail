@@ -2,7 +2,6 @@ package lists
 
 import (
 	"getmail/domain"
-	"getmail/util"
 )
 
 // List is where one subscriber can stay
@@ -19,6 +18,6 @@ func New(name string) (*List, error) {
 		Name: name,
 	}
 
-	err := util.ValidateData(model)
+	err := domain.ValidateData(model)
 	return model, err
 }

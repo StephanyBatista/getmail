@@ -13,6 +13,7 @@ require (
 	github.com/codesenberg/bombardier v1.2.4 // indirect
 	github.com/codesenberg/concurrent v0.0.0-20180531114123-64560cfcf964 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20200910202707-1e08a3fab204 // indirect
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.3.0
@@ -44,6 +45,7 @@ require (
 	gopkg.in/volatiletech/null.v6 v6.0.0-20170828023728-0bef4e07ae1b
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
+	gorm.io/driver/sqlite v1.1.3
 	gorm.io/driver/sqlserver v1.0.3
-	gorm.io/gorm v1.20.0
+	gorm.io/gorm v1.20.1
 )
