@@ -6,4 +6,4 @@ services:
     - "80:80"
     environment:
       PORT: 80
-      DB_CONNECTION: sqlserver://fuscauser:aa13@10Teste@fusca.database.windows.net:1433?database=getmail
+      DB_CONNECTION: {database}
