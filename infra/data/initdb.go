@@ -18,11 +18,11 @@ func getDB() *gorm.DB {
 	return db
 }
 
-//InitializeDB initializes connection and execute migrate from database
-func InitializeDB() {
+//InitializeDB initializes Connection and execute migrate from database
+func InitializeDB() *gorm.DB {
 	connection := getDB()
 	connection.AutoMigrate(&subscribers.Subscriber{}, &lists.List{})
 	fmt.Println("Connection SQL: ", connection)
 
-	Repository = &RepositoryStruct{connection: connection}
+	return connection
 }

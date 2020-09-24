@@ -17,16 +17,16 @@ type subscriberRequest struct {
 }
 
 //SubscriberPost create a new subscriber
-func SubscriberPost(c *gin.Context) {
+func SubscriberPost(c *gin.Context, repo data.IRepository) {
 	requestBody := subscriberRequest{}
 	c.Bind(&requestBody)
 
-	if err := subscribeHasAlreadyBeenSaved(requestBody); err != nil {
+	if err := subscribeHasAlreadyBeenSaved(requestBody, repo); err != nil {
 		c.JSON(http.StatusBadRequest, NewDataResponseWithError(err))
 		return
 	}
 
-	if err := saveNewSubscriber(requestBody); err != nil {
+	if err := saveNewSubscriber(requestBody, repo); err != nil {
 		c.JSON(http.StatusBadRequest, NewDataResponseWithError(err))
 		return
 	}
@@ -34,21 +34,21 @@ func SubscriberPost(c *gin.Context) {
 	c.JSON(http.StatusCreated, "")
 }
 
-func saveNewSubscriber(requestBody subscriberRequest) error {
+func saveNewSubscriber(requestBody subscriberRequest, repo data.IRepository) error {
 	model, err := subscribers.New(requestBody.Email, requestBody.Name)
 	if err != nil {
 		return err
 	}
 
-	putSubscriberOnListIfExist(requestBody.ListID, model)
-	data.Repository.Create(model)
+	putSubscriberOnListIfExist(requestBody.ListID, model, repo)
+	repo.Create(model)
 	return nil
 }
 
-func putSubscriberOnListIfExist(listID string, model *subscribers.Subscriber) error {
+func putSubscriberOnListIfExist(listID string, model *subscribers.Subscriber, repo data.IRepository) error {
 	if len(listID) > 0 {
 		var list lists.List
-		data.Repository.First(&list, "ID = ?", listID)
+		repo.First(&list, "ID = ?", listID)
 		if len(list.Base.ID) == 0 {
 			return fmt.Errorf("List not found")
 		}
@@ -58,15 +58,15 @@ func putSubscriberOnListIfExist(listID string, model *subscribers.Subscriber) er
 	return nil
 }
 
-func subscribeHasAlreadyBeenSaved(requestBody subscriberRequest) error {
+func subscribeHasAlreadyBeenSaved(requestBody subscriberRequest, repo data.IRepository) error {
 	var subscribedSaved subscribers.Subscriber
-	data.Repository.First(&subscribedSaved, "email = ?", requestBody.Email)
+	repo.First(&subscribedSaved, "email = ?", requestBody.Email)
 
 	if len(subscribedSaved.Base.ID) > 0 {
-		if err := putSubscriberOnListIfExist(requestBody.ListID, &subscribedSaved); err != nil {
+		if err := putSubscriberOnListIfExist(requestBody.ListID, &subscribedSaved, repo); err != nil {
 			return err
 		}
-		data.Repository.Save(&subscribedSaved)
+		repo.Save(&subscribedSaved)
 	}
 
 	return nil

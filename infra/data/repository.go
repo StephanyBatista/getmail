@@ -14,14 +14,12 @@ type IRepository interface {
 }
 
 type RepositoryStruct struct {
-	connection *gorm.DB
+	Connection *gorm.DB
 }
-
-var Repository IRepository
 
 //Create inserts a new row
 func (r *RepositoryStruct) Create(value interface{}) error {
-	result := r.connection.Create(value)
+	result := r.Connection.Create(value)
 	if result == nil || result.Error != nil {
 		return fmt.Errorf("an error ocurred")
 	}
@@ -30,7 +28,7 @@ func (r *RepositoryStruct) Create(value interface{}) error {
 
 //Save updates a row
 func (r *RepositoryStruct) Save(value interface{}) error {
-	result := r.connection.Save(value)
+	result := r.Connection.Save(value)
 	if result == nil || result.Error != nil {
 		return fmt.Errorf("an error ocurred")
 	}
@@ -40,7 +38,7 @@ func (r *RepositoryStruct) Save(value interface{}) error {
 //First select top 1 row
 func (r *RepositoryStruct) First(obj interface{}, query string, args ...interface{}) error {
 
-	result := r.connection.Where(query, args).First(obj)
+	result := r.Connection.Where(query, args).First(obj)
 	return result.Error
 }
 
@@ -49,9 +47,9 @@ func (r *RepositoryStruct) Find(obj interface{}, conds ...interface{}) error {
 	var result *gorm.DB
 
 	if conds == nil {
-		result = r.connection.Find(obj)
+		result = r.Connection.Find(obj)
 	} else {
-		result = r.connection.Find(obj, conds)
+		result = r.Connection.Find(obj, conds)
 	}
 
 	if result.Error != nil {
