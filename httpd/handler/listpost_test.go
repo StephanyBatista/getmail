@@ -6,12 +6,14 @@ import (
 	"getmail/util/fake"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gopkg.in/go-playground/assert.v1"
+	"github.com/stretchr/testify/require"
 )
 
 type MockRepository struct {
 	mock.Mock
+	listToReturn *lists.List
 }
 
 func (r *MockRepository) Create(value interface{}) error {
@@ -20,12 +22,21 @@ func (r *MockRepository) Create(value interface{}) error {
 }
 
 func (r *MockRepository) First(obj interface{}, query string, args ...interface{}) error {
-	a := r.Called(obj, query, args)
+	// We have to recombine all arguments into a single slice, then expand it
+	// out to arguments.
+	a := r.Called(append(append([]interface{}{}, obj, query), args...)...)
+
+	// Set the obj arg (if any).
+	if r.listToReturn != nil {
+		*(obj.(*lists.List)) = *r.listToReturn
+	}
+
 	return a.Error(0)
 }
 
 func (r *MockRepository) Find(obj interface{}, conds ...interface{}) error {
-	args := r.Called(obj, conds)
+	// See First.
+	args := r.Called(append(append([]interface{}{}, obj), conds...)...)
 	return args.Error(0)
 }
 
@@ -34,34 +45,55 @@ func (r *MockRepository) Save(value interface{}) error {
 	return args.Error(0)
 }
 
+// You should avoid using global state. Instead, refactor your code to inject
+// the repository into your code. This will have to do for now.
+func swapGlobalRepoForMock(repo data.IRepository) func() {
+	originalRepo := data.Repository
+	data.Repository = repo
+
+	return func() {
+		data.Repository = originalRepo
+	}
+}
+
 func Test_PostListMustReturn400WhenNameAlreadyExists(t *testing.T) {
+	listToReturn, err := lists.New("list 1")
+	require.NoError(t, err)
 
-	const name string = "List 1"
-	var json = []byte(`{"name": "` + name + `"}`)
-	mock := &MockRepository{}
-	listToReturn, _ := lists.New(name)
-	data.Repository = mock
+	repo := &MockRepository{
+		listToReturn: listToReturn,
+	}
+	defer repo.AssertExpectations(t)
+	repo.On("First", mock.Anything, "name = ?", "list 1").Return(nil)
 
-	mock.On("First", listToReturn, "name = ?", name).Return(nil)
+	defer swapGlobalRepoForMock(repo)()
 
+	var json = []byte(`{"name": "list 1"}`)
 	code, _ := fake.NewJsonRequest("POST", "/list", json)
+
 	assert.Equal(t, 400, code)
 }
 
-// func Test_PostListMustReturn400WhenNotSendNome(t *testing.T) {
+func Test_PostListMustReturn400WhenNotSendNome(t *testing.T) {
+	code, body := fake.NewJsonRequest("POST", "/list", nil)
+	assert.Equal(t, 400, code)
+	assert.Contains(t, body, "The Name is required")
+}
 
-// 	code, body := fake.NewJsonRequest("POST", "/list", nil)
-// 	assert.Equal(t, 400, code)
-// 	if !strings.Contains(body, "The Name is required") {
-// 		t.Fail()
-// 	}
-// }
+func Test_PostListMustReturn201WhenSaveANewSubscriber(t *testing.T) {
+	repo := &MockRepository{}
+	defer repo.AssertExpectations(t)
+	repo.On("First", mock.Anything, "name = ?", "list 1").Return(nil)
+	repo.On("Create", mock.Anything).Run(func(args mock.Arguments) {
+		// This is where you verify that it's creating the correct record.
+		list := args[0].(*lists.List)
+		assert.Equal(t, "list 1", list.Name)
+	}).Return(nil)
 
-// func Test_PostListMustReturn201WhenSaveANewSubscriber(t *testing.T) {
+	defer swapGlobalRepoForMock(repo)()
 
-// 	var json = []byte(`{"name": "list 1"}`)
+	var json = []byte(`{"name": "list 1"}`)
+	code, _ := fake.NewJsonRequest("POST", "/list", json)
 
-// 	code, _ := fake.NewJsonRequest("POST", "/list", json)
-
-// 	assert.Equal(t, 201, code)
-// }
+	assert.Equal(t, 201, code)
+}
