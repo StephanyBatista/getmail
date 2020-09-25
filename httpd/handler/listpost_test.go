@@ -2,7 +2,6 @@ package handler_test
 
 import (
 	"getmail/domain/lists"
-	"getmail/infra/data"
 	"getmail/util/fake"
 	"testing"
 
@@ -45,17 +44,6 @@ func (r *MockRepository) Save(value interface{}) error {
 	return args.Error(0)
 }
 
-// You should avoid using global state. Instead, refactor your code to inject
-// the repository into your code. This will have to do for now.
-func swapGlobalRepoForMock(repo data.IRepository) func() {
-	originalRepo := data.Repository
-	data.Repository = repo
-
-	return func() {
-		data.Repository = originalRepo
-	}
-}
-
 func Test_PostListMustReturn400WhenNameAlreadyExists(t *testing.T) {
 	listToReturn, err := lists.New("list 1")
 	require.NoError(t, err)
@@ -66,16 +54,14 @@ func Test_PostListMustReturn400WhenNameAlreadyExists(t *testing.T) {
 	defer repo.AssertExpectations(t)
 	repo.On("First", mock.Anything, "name = ?", "list 1").Return(nil)
 
-	defer swapGlobalRepoForMock(repo)()
-
 	var json = []byte(`{"name": "list 1"}`)
-	code, _ := fake.NewJsonRequest("POST", "/list", json)
+	code, _ := fake.NewJsonRequest(repo, "POST", "/list", json)
 
 	assert.Equal(t, 400, code)
 }
 
 func Test_PostListMustReturn400WhenNotSendNome(t *testing.T) {
-	code, body := fake.NewJsonRequest("POST", "/list", nil)
+	code, body := fake.NewJsonRequest(nil, "POST", "/list", nil)
 	assert.Equal(t, 400, code)
 	assert.Contains(t, body, "The Name is required")
 }
@@ -90,10 +76,8 @@ func Test_PostListMustReturn201WhenSaveANewSubscriber(t *testing.T) {
 		assert.Equal(t, "list 1", list.Name)
 	}).Return(nil)
 
-	defer swapGlobalRepoForMock(repo)()
-
 	var json = []byte(`{"name": "list 1"}`)
-	code, _ := fake.NewJsonRequest("POST", "/list", json)
+	code, _ := fake.NewJsonRequest(repo, "POST", "/list", json)
 
 	assert.Equal(t, 201, code)
 }

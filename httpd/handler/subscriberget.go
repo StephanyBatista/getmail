@@ -8,9 +8,9 @@ import (
 )
 
 //SubscriberGet get all subscriber
-func SubscriberGet(c *gin.Context) {
+func SubscriberGet(c *gin.Context, repo data.IRepository) {
 	var subscribers []subscribers.Subscriber
-	if err := data.Repository.Find(&subscribers); err != nil {
+	if err := repo.Find(&subscribers); err != nil {
 		c.JSON(500, NewDataResponseWithServerError())
 		return
 	}
