@@ -11,9 +11,9 @@ type List struct {
 }
 
 //New creates a new subscriber
-func New(name string) (*List, error) {
+func New(name string) (List, error) {
 	base := domain.NewBase()
-	model := &List{
+	model := List{
 		Base: base,
 		Name: name,
 	}

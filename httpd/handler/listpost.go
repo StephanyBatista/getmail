@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"getmail/domain"
 	"getmail/domain/lists"
 	"getmail/infra/data"
 
@@ -9,7 +9,7 @@ import (
 )
 
 type listRequest struct {
-	Name string `json:"name" form:"name"`
+	Name string `json:"name"`
 }
 
 //ListPost create a new list
@@ -18,26 +18,19 @@ func ListPost(c *gin.Context, repo data.IRepository) {
 	requestBody := listRequest{}
 	c.Bind(&requestBody)
 
-	if requestBody.Name == "" {
-		c.JSON(400, DataResponse{Error: "The Name is required"})
-		return
-	}
-
-	var list lists.List
-	repo.First(&list, "name = ?", requestBody.Name)
-	if len(list.Base.ID) > 0 {
-		c.JSON(400, NewDataResponseWithError(fmt.Errorf("List already exists")))
-		return
-	}
-
 	model, err := lists.New(requestBody.Name)
 	if err != nil {
-		c.JSON(400, NewDataResponseWithError(err))
+		c.JSON(ResponseWithError(err))
+		return
+	}
+
+	if listSaved, _ := repo.First(&lists.List{}, "name = ?", requestBody.Name); listSaved != nil {
+		c.JSON(ResponseWithError(domain.NewError("List already exists")))
 		return
 	}
 
 	if err := repo.Create(model); err != nil {
-		c.JSON(500, NewDataResponseWithServerError())
+		c.JSON(ResponseWithError(err))
 		return
 	}
 

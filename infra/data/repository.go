@@ -9,8 +9,8 @@ import (
 type IRepository interface {
 	Create(value interface{}) error
 	Save(value interface{}) error
-	First(obj interface{}, query string, args ...interface{}) error
-	Find(obj interface{}, conds ...interface{}) error
+	First(obj interface{}, query string, args ...interface{}) (interface{}, error)
+	Find(obj interface{}, conds ...interface{}) (interface{}, error)
 }
 
 type RepositoryStruct struct {
@@ -36,14 +36,17 @@ func (r *RepositoryStruct) Save(value interface{}) error {
 }
 
 //First select top 1 row
-func (r *RepositoryStruct) First(obj interface{}, query string, args ...interface{}) error {
+func (r *RepositoryStruct) First(obj interface{}, query string, args ...interface{}) (interface{}, error) {
 
 	result := r.Connection.Where(query, args).First(obj)
-	return result.Error
+	if result.Error != nil && result.Error.Error() == "record not found" {
+		return nil, nil
+	}
+	return obj, result.Error
 }
 
 //Find select by interface
-func (r *RepositoryStruct) Find(obj interface{}, conds ...interface{}) error {
+func (r *RepositoryStruct) Find(obj interface{}, conds ...interface{}) (interface{}, error) {
 	var result *gorm.DB
 
 	if conds == nil {
@@ -53,7 +56,7 @@ func (r *RepositoryStruct) Find(obj interface{}, conds ...interface{}) error {
 	}
 
 	if result.Error != nil {
-		return result.Error
+		return obj, result.Error
 	}
-	return nil
+	return obj, nil
 }

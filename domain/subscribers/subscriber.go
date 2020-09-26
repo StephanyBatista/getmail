@@ -14,9 +14,9 @@ type Subscriber struct {
 }
 
 //New creates a new subscriber
-func New(email, name string) (*Subscriber, error) {
+func New(email, name string) (Subscriber, error) {
 	base := domain.NewBase()
-	model := &Subscriber{
+	model := Subscriber{
 		Base:  base,
 		Email: email,
 		Name:  name,

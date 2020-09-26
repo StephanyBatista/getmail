@@ -1,43 +1,36 @@
 package fake
 
-import "reflect"
+import (
+	"getmail/domain/lists"
+
+	"github.com/stretchr/testify/mock"
+)
 
 type MockRepository struct {
-	ReturnError error
-	ObjSent     interface{}
-	ReturnObj   interface{}
+	mock.Mock
+	ListToReturn *lists.List
 }
 
-func (m *MockRepository) Create(obj interface{}) error {
-	if m.ReturnError != nil {
-		return m.ReturnError
-	}
-	m.ObjSent = obj
-	return nil
+func (r *MockRepository) Create(value interface{}) error {
+	args := r.Called(value)
+	return args.Error(0)
 }
 
-func (m *MockRepository) First(obj interface{}, query string, args ...interface{}) error {
-	if m.ReturnError != nil {
-		return m.ReturnError
-	}
-
-	v := reflect.ValueOf(m.ReturnObj).Elem()
-	if v.CanSet() {
-		v.Set(reflect.ValueOf(obj))
-	}
-
-	return nil
+func (r *MockRepository) Save(value interface{}) error {
+	args := r.Called(value)
+	return args.Error(0)
 }
 
-func (m *MockRepository) Find(obj interface{}, conds ...interface{}) error {
-	if m.ReturnError != nil {
-		return m.ReturnError
-	}
+func (r *MockRepository) First(obj interface{}, query string, args ...interface{}) (interface{}, error) {
+	// We have to recombine all arguments into a single slice, then expand it
+	// out to arguments.
+	a := r.Called(append(append([]interface{}{}, obj, query), args...)...)
 
-	v := reflect.ValueOf(&m.ReturnObj).Elem()
-	if v.CanSet() {
-		v.Set(reflect.ValueOf(obj))
-	}
+	return a.Get(0), a.Error(1)
+}
 
-	return nil
+func (r *MockRepository) Find(obj interface{}, conds ...interface{}) (interface{}, error) {
+	// See First.
+	args := r.Called(append(append([]interface{}{}, obj), conds...)...)
+	return args.Get(0), args.Error(1)
 }
