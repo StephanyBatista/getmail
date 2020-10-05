@@ -21,6 +21,7 @@ func RegisterHTTPHandlers(repo data.IRepository) *gin.Engine {
 	router.GET("/subscriber", useRepository(repo, handler.SubscriberGet))
 	router.POST("/subscriber", useRepository(repo, handler.SubscriberPost))
 	router.POST("/list", useRepository(repo, handler.ListPost))
+	router.GET("/list", useRepository(repo, handler.ListGet))
 
 	return router
 }
